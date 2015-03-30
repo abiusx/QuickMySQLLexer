@@ -1,6 +1,5 @@
 <?php
 /**
- * 
  * QuickMySQLLexer is a MySQL SQL lexer.
  * It can tokenize MySQL queries, determine the type of each token and its position,
  * And generate clean query as well as markings and structure
@@ -222,7 +221,7 @@ class QuickMySQLLexer
 							$this->token($buf,$i-1);
 				}
 				if (!$inComment and (isset($this->symbols[$c]) or ($c=="*" and $prev!="."))) //if this char is a token
-					if (isset($this->symbols[$next])) //two char symbol
+					if (isset($this->symbols[$c.$next])) //two char symbol
 					{
 						$i++;
 						$this->token($c.$next,$i);
@@ -335,6 +334,25 @@ class QuickMySQLLexer
 if (isset($argv) and $argv[0]==__FILE__)
 {
 	$queries=<<<XXX
+SELECT COUNT(*) AS Result
+FROM 
+	rbac_userroles AS TUrel 
+ 
+	JOIN rbac_roles AS TRdirect ON (TRdirect.ID=TUrel.RoleID)
+	JOIN rbac_roles AS TR ON ( TR.Lft BETWEEN TRdirect.Lft AND TRdirect.Rght)
+	/* we join direct roles with indirect roles to have all descendants of direct roles */
+	JOIN
+	(	rbac_permissions AS TPdirect
+	JOIN rbac_permissions AS TP ON ( TPdirect.Lft BETWEEN TP.Lft AND TP.Rght)
+	/* direct and indirect permissions */
+	JOIN rbac_rolepermissions AS TRel ON (TP.ID=TRel.PermissionID)
+	/* joined with role/permissions on roles that are in relation with these permissions*/
+	) ON ( TR.ID = TRel.RoleID)
+	WHERE
+	/* TU.ID=? */
+	TUrel.UserID=?
+	AND
+	TPdirect.ID=?;
 select/**/1--d
 ,2#comment
 ,'abc'//comment
@@ -365,7 +383,7 @@ SELECT   wp38_posts.ID FROM wp38_posts  WHERE 1=1  AND wp38_posts.post_type = 'p
 SELECT YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, count(ID) as posts FROM wp38_posts  WHERE post_type = 'post' AND post_status = 'publish' GROUP BY YEAR(post_date), MONTH(post_date) ORDER BY post_date DESC ;
 XXX;
 	$queries=explode(";",$queries);
-	$index=12;
+	$index=0;
 	$q=new QuickMySQLLexer();
 	$tokens=$q->lex($queries[$index]);
 	$mark=$queries[$index];//str_repeat(" ",strlen($queries[$index]));
