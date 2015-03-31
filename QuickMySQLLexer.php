@@ -99,7 +99,7 @@ class QuickMySQLLexer
 			$res['type']=self::TYPE_NUMBER;
 		else
 			$res['type']=self::TYPE_IDENTIFIER;
-		print_r($res);
+		// print_r($res);
 		$this->tokens[]=$res;
 		return $res;
 	}
