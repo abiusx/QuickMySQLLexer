@@ -99,7 +99,7 @@ class QuickMySQLLexer
 			$res['type']=self::TYPE_NUMBER;
 		else
 			$res['type']=self::TYPE_IDENTIFIER;
-		// print_r($res);
+		print_r($res);
 		$this->tokens[]=$res;
 		return $res;
 	}
@@ -220,18 +220,16 @@ class QuickMySQLLexer
 				// if (isset($this->twoWorders[strtolower($buf)])) #two word tokens
 					// $oldToken=$buf;
 				// else #one word tokens
-				{
-					if (!$this->isWhitespace($buf)) //only if not whitespace
-						// if ($oldToken and $this->twoWorders[strtolower($oldToken)]==strtolower($buf)) #if second word of a two word
-						// {
-							// $this->token($oldToken." ".$buf,$i-1);
-							// $oldToken="";
-						// }
-						// else #single word, not whitespace
-							$this->token($buf,$i-1);
-				}
+				if (!$this->isWhitespace($buf)) //only if not whitespace
+					// if ($oldToken and $this->twoWorders[strtolower($oldToken)]==strtolower($buf)) #if second word of a two word
+					// {
+						// $this->token($oldToken." ".$buf,$i-1);
+						// $oldToken="";
+					// }
+					// else #single word, not whitespace
+						$this->token($buf,$i-1);
 				if (!$inComment and (isset($this->symbols[$c]) or ($c=="*" and $prev!="."))) //if this char is a token
-					if (isset($this->symbols[$c.$next])) //two char symbol
+					if ($next and isset($this->symbols[$c.$next])) //two char symbol
 					{
 						$i++;
 						$this->token($c.$next,$i);
@@ -345,6 +343,7 @@ class QuickMySQLLexer
 if (isset($argv) and $argv[0]==__FILE__)
 {
 	$queries=<<<XXX
+SELECT FOUND_ROWS();
 	select "\"",'\'',"'",'"',5;
 SELECT * FROM data WHERE ID=-1 UNION ALL SELECT 1,2,group_concat(select * from users where id=1),user() -- ;
 SELECT * FROM wp_zotpress_images WHERE citation_id='-1' AND 1=IF(2>1,BENCHMARK(5000000,MD5(CHAR(115,113,108,109,97,112))),0) #';
